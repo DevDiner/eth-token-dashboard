@@ -14,7 +14,7 @@ foundryup
 
 ```bash
 cd  module-1/src
-foundry init --no-commit
+forge init --no-commit
 ```
 
 - Creates a basic scaffolding (including `foundry.toml`, `src/`, `test/`).
