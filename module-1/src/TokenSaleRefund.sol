@@ -1,112 +1,124 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title TokenSaleRefundERC20
- * @dev Extends a token sale to allow partial refunds:
- *      - 1 ETH => 1000 tokens (buy)
- *      - 0.5 ETH => 1000 tokens (sell back)
- *      - Re-sell from the contract's token balance or mint new if supply remains
- *      - Max supply remains 1,000,000 tokens
- *      - Users must approve this contract before calling `sellBack`
+ * @dev ERC20 token contract that allows users to buy tokens with ETH and sell them back for a partial refund.
+ * - Users can buy tokens at a fixed rate of `1 ETH = 1000 tokens`
+ * - Users can sell tokens back for `0.5 ETH per 1000 tokens`
+ * - Contract has a fixed max supply of 1,000,000 tokens
+ * - Unsold tokens are stored in the contract for reuse before minting new tokens
  */
 contract TokenSaleRefundERC20 is ERC20, Ownable {
-    /// @dev 1,000,000 tokens (with 18 decimals)
+    /// @dev Maximum supply of tokens (1,000,000 tokens with 18 decimals).
     uint256 public constant MAX_SUPPLY = 1000000 ether;
 
-    /// @dev Buy rate: 1 ETH => 1000 tokens => 1000 ether
+    /// @dev Rate at which tokens are bought (1 ETH = 1000 tokens).
     uint256 public constant TOKENS_PER_ETH_PRICE = 1000 ether;
 
-    /// @dev Sell rate: 0.5 ETH => 1000 tokens => 0.0005 ETH per token = 5e14 wei
-    ///      If user sells X tokens => (X * 5e14) / 1e18 wei
-    uint256 public constant WEI_PER_TOKEN_SELL = 5e14; // 0.0005 ETH in wei
+    /// @dev Rate at which tokens are sold back (0.5 ETH per 1000 tokens).
+    uint256 public constant WEI_PER_TOKEN_SELL = 5e14; // 0.0005 ETH per token in wei
 
-    /// @dev Custom errors for clarity & gas savings
+    /// @dev Custom errors to save gas when reverting.
     error NoEtherSent();
     error ExceedsMaxSupply(uint256 currentSupply, uint256 attemptedMint, uint256 maxSupply);
     error NotEnoughEthInContract(uint256 contractBalance, uint256 required);
     error WithdrawFailed();
+    error InsufficientEtherSent();
 
+    /// @dev Debugging events for checking allowances and balances.
+    event DebugAllowance(address indexed user, uint256 allowance);
+    event DebugBalance(address indexed user, uint256 balance);
+
+    /**
+     * @dev Contract constructor initializes the token with a name and symbol.
+     * The deployer is set as the owner.
+     */
     constructor() ERC20("RefundableSaleToken", "RFT") Ownable(msg.sender) {}
 
     /**
-     * @dev Buy tokens by sending ETH. 
-     *      - Fallback to buy if user calls contract with raw ETH.
+     * @dev Allows users to buy tokens by sending ETH directly to the contract.
+     * This function acts as a fallback to call `buyTokens()`.
      */
     receive() external payable {
         buyTokens();
     }
 
     /**
-     * @dev Buys tokens at 1 ETH => 1000 tokens.
-     *      If the contract holds enough tokens (from prior sell-backs),transfer
-     *      those first. Otherwise, mint the difference, respecting the max supply.
+     * @dev Allows users to buy tokens at a fixed rate.
+     * If the contract has tokens, it transfers them before minting new ones.
+     * The function ensures that the total supply does not exceed `MAX_SUPPLY`.
+     *
+     * Requirements:
+     * - The user must send a nonzero amount of ETH.
+     * - The contract must have tokens available or be able to mint new ones.
      */
     function buyTokens() public payable {
-        if (msg.value <= 0) {
-            revert NoEtherSent();
-        }
+        if (msg.value <= 0) revert NoEtherSent();
+        if (msg.value < 1 ether) revert InsufficientEtherSent();
 
-        // 1 ETH => (1 ether * 1000 ether) / 1 ether = 1000 ether tokens
-        uint256 tokensToBuy = (msg.value * TOKENS_PER_ETH_PRICE) / 1 ether;
-
-        // 1) Check how many tokens the contract currently holds
-        uint256 contractTokenBalance = balanceOf(address(this));
-
-        if (contractTokenBalance >= tokensToBuy) {
-            // The contract has enough tokens in its balance to sell
-            _transfer(address(this), msg.sender, tokensToBuy);
+        uint256 tokensToBuy = (msg.value * TOKENS_PER_ETH_PRICE ) / 1 ether;
+        
+        if (msg.sender == address(this)) {
+            // If contract is buying tokens, store them in the contract itself
+            require(totalSupply() + tokensToBuy <= MAX_SUPPLY, "Exceeds max supply");
+            _mint(address(this), tokensToBuy);
         } else {
-            // Use up whatever the contract has first
+            uint256 contractTokenBalance = balanceOf(address(this));
+
             if (contractTokenBalance > 0) {
-                _transfer(address(this), msg.sender, contractTokenBalance);
-                tokensToBuy -= contractTokenBalance; // reduce the remaining to mint
+                uint256 tokensToTransfer = tokensToBuy > contractTokenBalance ? contractTokenBalance : tokensToBuy;
+                _transfer(address(this), msg.sender, tokensToTransfer);
+                tokensToBuy -= tokensToTransfer;
             }
 
-            // 2) Mint the remainder, if haven't hit the max supply
-            uint256 currentSupply = totalSupply();
-            // Attempting to mint `tokensToBuy` more
-            if (currentSupply + tokensToBuy > MAX_SUPPLY) {
-                revert ExceedsMaxSupply(currentSupply, tokensToBuy, MAX_SUPPLY);
+            if (tokensToBuy > 0) {
+                if (totalSupply() + tokensToBuy > MAX_SUPPLY) {
+                    revert ExceedsMaxSupply(totalSupply(), tokensToBuy, MAX_SUPPLY);
+                }
+                _mint(msg.sender, tokensToBuy);
             }
-            _mint(msg.sender, tokensToBuy);
         }
     }
 
+
     /**
-     * @dev Sell back `amount` of tokens. 
-     *      - Rate: 1000 tokens => 0.5 ETH => 0.0005 ETH each
-     *      - Must revert if contract lacks enough ETH to pay.
-     *      - The user must have approved this contract to pull `amount` tokens.
+     * @dev Allows users to sell back their tokens in exchange for ETH.
+     * The ETH amount is calculated based on `WEI_PER_TOKEN_SELL`.
+     *
+     * Requirements:
+     * - The user must specify a nonzero amount of tokens.
+     * - The contract must have enough ETH to process the refund.
+     * - The user must have approved the contract to spend their tokens.
      */
     function sellBack(uint256 amount) external {
         require(amount > 0, "Sell amount must be > 0");
 
-        // Calculate ETH to pay the user
-        // For each 1 token, user gets 0.0005 ETH => 5e14 wei
-        // => total wei = (amount * 5e14) / 1e18
+        // Calculate ETH payout
         uint256 ethToPay = (amount * WEI_PER_TOKEN_SELL) / 1 ether;
-
-        // Ensure contract can afford to pay
-        uint256 contractEthBal = address(this).balance;
-        if (contractEthBal < ethToPay) {
-            revert NotEnoughEthInContract(contractEthBal, ethToPay);
+        if (address(this).balance < ethToPay) {
+            revert NotEnoughEthInContract(address(this).balance, ethToPay);
         }
 
-        // 1) Transfer user's tokens to contract
-        //    The user must have approved the contract for `amount` prior
-        //    With `_transfer` after spending allowance,
-        //    or by calling the standard transferFrom approach.
-        //    User `approve(...)` first
-        bool successTransfer = transferFrom(msg.sender, address(this), amount);
-        require(successTransfer, "Token transfer failed. Check allowance?");
+        // Ensure the contract has approval to spend the tokens
+        require(allowance(msg.sender, address(this)) >= amount, "Incorrect allowance");
 
-        // 2) Send ETH
+        // Emit debugging events before performing transfer
+        emit DebugAllowance(msg.sender, allowance(msg.sender, address(this)));
+        emit DebugBalance(msg.sender, balanceOf(msg.sender));
+
+        // Transfer tokens from the user to the contract
+        _transfer(msg.sender, address(this), amount);
+
+        // Reduce the allowance used
+        _approve(msg.sender, address(this), allowance(msg.sender, address(this)) - amount);
+
+        // Send ETH to the user
         (bool success, ) = msg.sender.call{value: ethToPay}("");
-        require(success, "ETH transfer to seller failed");
+        require(success, "ETH transfer failed");
     }
 
     /**
