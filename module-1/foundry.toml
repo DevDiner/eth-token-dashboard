@@ -1,8 +1,15 @@
 [profile.default]
 src = "src"
 out = "out"
+test= "test"
+script = "script"
 libs = ["lib"]
 remappings = ['@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/']
+
+ffi= false
+fuzz_runs = 256
+verbosity = 3           # Test verbosity level (1-4)
+
 
 # Wallet configuration: Use PRIVATE_KEY from environment variable
 # [wallets]
