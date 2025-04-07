@@ -1,0 +1,54 @@
+/* globals.css */
+
+/* Import a custom font from Google Fonts (Montserrat & Roboto) */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Roboto:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  transition: background-color 0.5s ease;
+}
+
+h1, h2, h3, p {
+  transition: color 0.5s ease;
+}
+
+.loader {
+  border-color: #4a90e2;
+}
+
+.bg-gradient {
+  background: linear-gradient(135deg, #4a90e2, #9013fe);
+}
+/* Custom font classes */
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.font-roboto {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Smooth fade-up animation */
+@keyframes fadeInUp {
+  0% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+/* Ensure no horizontal overflow */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
