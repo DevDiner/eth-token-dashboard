@@ -1,0 +1,33 @@
+[profile.default]
+src = "src"
+out = "out"
+test= "test"
+script = "script"
+libs = ["lib"]
+remappings = ['@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/']
+
+ffi= false
+fuzz_runs = 256
+verbosity = 3           # Test verbosity level (1-4)
+
+
+# Wallet configuration: Use PRIVATE_KEY from environment variable
+# [wallets]
+# private_key = { env = "PRIVATE_KEY" }
+
+# # Network configurations
+# [networks]
+# [networks.sepolia]
+# url = { env = "SEPOLIA_RPC_URL" }
+# chain_id = 11155111  # Sepolia's chain ID
+# gas_price = "auto"   # Use automatic gas price estimation
+
+# # Optional
+# [networks.mainnet]
+# url = { env = "MAINNET_RPC_URL" }
+# chain_id = 1
+# gas_price = "auto"
+
+
+# [verify]
+# etherscan_api_key = { env = "ETHERSCAN_API_KEY" }
