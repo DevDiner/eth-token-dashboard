@@ -7,9 +7,9 @@ import Chart from "../components/Chart";
 import { defaultAbiCoder } from "@ethersproject/abi";
 // import { tokenPocketWallet } from "@rainbow-me/rainbowkit/wallets";
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+// function sleep(ms: number) {
+//   return new Promise((resolve) => setTimeout(resolve, ms));
+// }
 function formatString(
   weiValue: bigint,
   decimals: number = 18,
@@ -29,13 +29,13 @@ function formatString(
   return truncatedFrac.length ? `${intPart}.${truncatedFrac}` : intPart; // no fractional part if fraction is empty
 }
 
-declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      NEXT_PUBLIC_ALCHEMY_API_KEY: string;
-    }
-  }
-}
+// declare global {
+//   namespace NodeJS {
+//     interface ProcessEnv {
+//       NEXT_PUBLIC_ALCHEMY_API_KEY: string;
+//     }
+//   }
+// }
 
 interface MyBlock {
   number: number;
@@ -57,7 +57,8 @@ interface DashboardStats {
 }
 
 const Dashboard = () => {
-  const { darkMode, toggleDarkMode } = useTheme();
+  const { darkMode} = useTheme();  //Old implementation: const { darkMode, toggleDarkMode } = useTheme();
+
 
   // List of popular tokens
   const tokens = [
@@ -99,13 +100,13 @@ const Dashboard = () => {
   }, []);
 
   // 4) Handler for the dropdown change
-  const handleTokenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newAddress = e.target.value;
-    // Save to localStorage so we can restore it on next page load
-    localStorage.setItem("selectedToken", newAddress);
-    // Update state so your fetch code re-runs
-    setTokenAddress(newAddress);
-  };
+  // const handleTokenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const newAddress = e.target.value;
+  //   // Save to localStorage so we can restore it on next page load
+  //   localStorage.setItem("selectedToken", newAddress);
+  //   // Update state so your fetch code re-runs
+  //   setTokenAddress(newAddress);
+  // };
   // -------------------------------------------
   // (A) Fetch the ERC-20 token name whenever `tokenAddress` changes
   useEffect(() => {

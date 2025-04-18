@@ -17,7 +17,6 @@ import {
   ScriptableContext,
   Plugin,
   ChartType,
-  DecimationAlgorithm,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { motion } from "framer-motion";
@@ -43,16 +42,28 @@ const glowLinePlugin: Plugin<ChartType> = {
   beforeDatasetsDraw: (chart) => {
     const { ctx } = chart;
     // Force-cast to any so TS doesn't complain about apply(...) usage
-    const originalStroke = ctx.stroke as any;
-
-    ctx.stroke = function (...args: any[]) {
+    // const originalStroke = ctx.stroke as any;
+    
+    // capture the original stroke function with correct typing
+    const originalStroke = ctx.stroke.bind(ctx);
+    
+    // override `stroke` using the exact parameter tuple
+    // ctx.stroke = function (...args: any[]) {
+      ctx.stroke = function (this: CanvasRenderingContext2D, path?: Path2D) {
       ctx.save();
       ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
       ctx.shadowBlur = 15;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 4;
-      originalStroke.apply(this, args);
-      ctx.restore();
+      //originalStroke.apply(this, args);
+      if (path instanceof Path2D) {
+        // draw the given Path2D
+        originalStroke(path);
+      } else {
+        // draw the current path
+        originalStroke();
+      }
+        ctx.restore();
     };
   },
 };
@@ -189,54 +200,54 @@ const Chart: FC<ChartProps> = ({
 
   // -----------------------------------------------------------
   // E) DETERMINE DYNAMIC Y-AXIS SCALING IF label.includes("Fee")
-  let yScaleOptions: any = {
-    beginAtZero: true,
-    grid: {
-      color: darkMode ? "rgba(255,255,255,0.05)" : "rgba(107,114,128,0.1)",
-    },
-    border: { display: false },
-    ticks: {
-      font: {
-        size: 11,
-        family: "'Inter', system-ui, sans-serif",
-      },
-      color: darkMode ? "rgba(200,200,200,0.7)" : "rgba(107,114,128,1)",
-      padding: 8,
-    },
-    format: {
-      style: "decimal",
-      notation: "standard", // prevents e-notation
-      maximumSignificantDigits: 7, // up to 7 digits
-    },
-    title: {
-      display: !!yAxisLabel,
-      text: yAxisLabel,
-      font: {
-        size: 12,
-        family: "'Inter', system-ui, sans-serif",
-        weight: 500,
-      },
-      padding: { bottom: 8 },
-      color: darkMode ? "#fff" : "#111",
-    },
-    type: "logarithmic",
-  };
+  // let yScaleOptions: any = {
+  //   beginAtZero: true,
+  //   grid: {
+  //     color: darkMode ? "rgba(255,255,255,0.05)" : "rgba(107,114,128,0.1)",
+  //   },
+  //   border: { display: false },
+  //   ticks: {
+  //     font: {
+  //       size: 11,
+  //       family: "'Inter', system-ui, sans-serif",
+  //     },
+  //     color: darkMode ? "rgba(200,200,200,0.7)" : "rgba(107,114,128,1)",
+  //     padding: 8,
+  //   },
+  //   format: {
+  //     style: "decimal",
+  //     notation: "standard", // prevents e-notation
+  //     maximumSignificantDigits: 7, // up to 7 digits
+  //   },
+  //   title: {
+  //     display: !!yAxisLabel,
+  //     text: yAxisLabel,
+  //     font: {
+  //       size: 12,
+  //       family: "'Inter', system-ui, sans-serif",
+  //       weight: 500,
+  //     },
+  //     padding: { bottom: 8 },
+  //     color: darkMode ? "#fff" : "#111",
+  //   },
+  //   type: "logarithmic",
+  // };
 
-  if (label.includes("Fee")) {
-    // We want to emphasize small changes in fee data
-    // Compute min & max, add padding so it doesn't look flat
-    const dataMin = Math.min(...data);
-    const dataMax = Math.max(...data);
-    const range = dataMax - dataMin;
-    // If range is extremely small, we can set a fallback
-    const minRange = 0.1; // ensure some minimal range
-    const actualRange = Math.max(range, minRange);
-    const padding = actualRange * 0.5;
+  // if (label.includes("Fee")) {
+  //   // We want to emphasize small changes in fee data
+  //   // Compute min & max, add padding so it doesn't look flat
+  //   const dataMin = Math.min(...data);
+  //   const dataMax = Math.max(...data);
+  //   const range = dataMax - dataMin;
+  //   // If range is extremely small, we can set a fallback
+  //   const minRange = 0.1; // ensure some minimal range
+  //   const actualRange = Math.max(range, minRange);
+  //   const padding = actualRange * 0.5;
 
-    yScaleOptions.beginAtZero = false;
-    yScaleOptions.min = dataMin - padding;
-    yScaleOptions.max = dataMax + padding;
-  }
+  //   yScaleOptions.beginAtZero = false;
+  //   yScaleOptions.min = dataMin - padding;
+  //   yScaleOptions.max = dataMax + padding;
+  // }
 
   // -----------------------------------------------------------
   // F) CHART OPTIONS
@@ -304,17 +315,39 @@ const Chart: FC<ChartProps> = ({
         },
         title: {
           display: !!xAxisLabel,
-          text: xAxisLabel,
+          text: xAxisLabel || "",
           font: {
             size: 12,
             family: "'Inter', system-ui, sans-serif",
             weight: 500,
           },
-          padding: { top: 8 },
+          padding: 8,
           color: darkMode ? "#fff" : "#111",
         },
       },
-      y: yScaleOptions,
+      y: {
+          type: "logarithmic",
+          // set your floor or dynamic Fee min/max right inline
+          min: label.includes("Fee")
+          ? Math.min(...data) - Math.max((Math.max(...data) - Math.min(...data)), 0.1) * 0.5
+            : 1,
+          suggestedMin: 1,
+          grid: {
+            color: darkMode ? "rgba(255,255,255,0.05)" : "rgba(107,114,128,0.1)",
+          },
+          ticks: {
+            font: { size: 11, family: "'Inter', system-ui, sans-serif" },
+            color: darkMode ? "rgba(200,200,200,0.7)" : "rgba(107,114,128,1)",
+            padding: 8,
+          },
+          title: {
+            display: !!yAxisLabel,
+            text: yAxisLabel || "",
+            font: { size: 12, family: "'Inter', system-ui, sans-serif", weight: 500 },
+            padding: 8,
+            color: darkMode ? "#fff" : "#111",
+          },
+        },
     },
     interaction: {
       intersect: false,
