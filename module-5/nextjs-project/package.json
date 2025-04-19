@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ethersproject/abi": "^5.8.0",
     "@heroicons/react": "^2.2.0",
     "@types/chart.js": "^2.9.41",
     "chart.js": "^4.4.8",

@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Here is a **README.md** based on the provided code and functionalities for your Ethereum analytics dashboard:
 
-## Getting Started
+---
 
-First, run the development server:
+# ETH Token Info Dashboard
+
+![ETH Token Info Dashboard](image-2.png)
+
+**ETH Token Info Dashboard** is a real-time analytics tool for Ethereum. It allows users to monitor and visualize critical network metrics such as **ERC20 token transfer volume**, **base fee** (EIP-1559), and **gas usage ratio**. Built with **Next.js**, **React**, **Ethers.js**, and **Framer Motion**, this dashboard provides real-time Ethereum data, helping developers and token holders track token activities, transaction costs, and network utilization.
+
+<p align="center" style="margin:0;">
+  <img src="image-3.png" alt="Screenshot 3" style="margin:0;" />
+  <img src="image-4.png" alt="Screenshot 4" style="margin:0;" />
+  <img src="image-5.png" alt="Screenshot 5" style="margin:0;" />
+  <img src="image-6.png" alt="Screenshot 6" style="margin:0;" />
+  <img src="image-7.png" alt="Screenshot 7" style="margin:0;" />
+  <img src="image-8.png" alt="Screenshot 8" style="margin:0;" />
+</p>
+
+## Overview
+
+- **ERC20 Token Tracking:**  
+  Visualize **ERC20 token transfer volume** over the latest 10 blocks.
+- **Base Fee Visualization:**  
+  Monitor the **base fee** for each block (EIP-1559).
+- **Gas Usage Ratio:**  
+  Track the **gas usage ratio** (used/limit) for each block, showing network congestion.
+- **Real-Time Data:**  
+  Displays data in real-time from the **Ethereum network** using **Alchemy API**.
+- **Token Selection:**  
+  Select any popular ERC20 token (DAI, USDC, USDT, WETH, etc.) to monitor transfer activity and performance.
+
+## Key Features
+
+1. **ERC20 Token Transfer Volume**  
+   Track the **total transfer volume** for an ERC20 token over the last 10 blocks.
+
+2. **Base Fee Tracking (EIP-1559)**  
+   Visualize **gas base fee** per block and understand the cost of transactions.
+
+3. **Gas Usage Ratio**  
+   Measure the **gas usage percentage** per block to assess network congestion.
+
+4. **Real-Time Ethereum Data**  
+   The dashboard pulls real-time data from Ethereum using **Alchemy** and updates instantly.
+
+5. **Token Selection**  
+   Select different ERC20 tokens like DAI, USDC, WETH, and others. The token data is fetched and displayed dynamically.
+
+## Live Demo & Preview
+
+- **Vercel Deployment:** [https://my-dashboard-dapp.vercel.app/](https://my-dashboard-dapp.vercel.app/)
+
+## Deployed Contract Addresses (Mainnet)
+
+- **DAI Token Address:** `0x6B175474E89094C44Da98b954EedeAC495271d0F`  
+- **USDC Token Address:** `0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48`  
+- **USDT Token Address:** `0xdAC17F958D2ee523a2206206994597C13D831ec7`  
+
+*Note: These addresses are for the Sepolia testnet. Replace them with Mainnet addresses when deploying on the Ethereum Mainnet.*
+
+## How It Works
+
+1. **Wallet Connection:**  
+   - Connect your **MetaMask** wallet. The dashboard automatically switches to the **Sepolia network** if required.
+
+2. **Token Selection:**  
+   - Choose any ERC20 token (like DAI, USDC, USDT) to monitor.
+
+3. **Monitor Transfer Volume:**  
+   - See the **total volume** of the selected token's transfers per block.
+
+4. **Track Gas Fees:**  
+   - Observe the **base fee** for transactions and how network capacity is utilized by checking the **gas usage ratio** per block.
+
+5. **Real-Time Updates:**  
+   - Data is updated instantly on new blocks, giving you real-time insights into the Ethereum network.
+
+## Setup & Deployment Instructions
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/devdiner/eth-token-info-dashboard.git
+cd eth-token-info-dashboard
+```
+
+### 2. Install Dependencies
+
+For the frontend:
+
+```bash
+cd nextjs
+npm install
+```
+
+### 3. Set Environment Variables
+
+Create or update your `.env` file in `nextjs` with the following:
+
+```
+NEXT_PUBLIC_ALCHEMY_API_KEY=yourAlchemyApiKey //mainnet's
+```
+
+### 4. Run the Application
+
+From the `nextjs` folder, run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application should now be running at [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Additional Considerations
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Sufficient ETH:**  
+  Ensure your MetaMask wallet has enough **Sepolia ETH** for gas fees.
 
-## Learn More
+- **Real-Time Data:**  
+  The dashboard fetches the latest Ethereum data for ERC20 token transfers, base fee, and gas usage from **Alchemy**.
 
-To learn more about Next.js, take a look at the following resources:
+- **MetaMask Requirement:**  
+  The dashboard requires **MetaMask** for wallet connection. Other wallets, like **Phantom**, are not supported at the moment.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT License
