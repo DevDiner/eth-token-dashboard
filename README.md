@@ -1,21 +1,22 @@
-Here is a **README.md** based on the provided code and functionalities for your Ethereum analytics dashboard:
-
----
-
 # ETH Token Info Dashboard
-
-![ETH Token Info Dashboard](image-2.png)
 
 **ETH Token Info Dashboard** is a real-time analytics tool for Ethereum. It allows users to monitor and visualize critical network metrics such as **ERC20 token transfer volume**, **base fee** (EIP-1559), and **gas usage ratio**. Built with **Next.js**, **React**, **Ethers.js**, and **Framer Motion**, this dashboard provides real-time Ethereum data, helping developers and token holders track token activities, transaction costs, and network utilization.
 
 <p align="center" style="margin:0;">
-  <img src="image-3.png" alt="Screenshot 3" style="margin:0;" />
-  <img src="image-4.png" alt="Screenshot 4" style="margin:0;" />
-  <img src="image-5.png" alt="Screenshot 5" style="margin:0;" />
-  <img src="image-6.png" alt="Screenshot 6" style="margin:0;" />
-  <img src="image-7.png" alt="Screenshot 7" style="margin:0;" />
-  <img src="image-8.png" alt="Screenshot 8" style="margin:0;" />
+  <img src="./assets/image-3.png" alt="Screenshot 3" style="margin:0;" />
+  <img src="./assets/image-4.png" alt="Screenshot 4" style="margin:0;" />
+  <img src="./assets/image-5.png" alt="Screenshot 5" style="margin:0;" />
 </p>
+
+
+## Skills Demonstrated:
+
+- **Web Development:** Proficient in building dynamic, real-time applications with modern web technologies, including **Next.js**, **React**, and **Framer Motion** for smooth animations.
+- **Blockchain Integration:** Expertise in integrating blockchain data with **Ethers.js** and **Alchemy API** to fetch real-time Ethereum data for ERC20 tokens and blockchain metrics.
+- **Smart Contract Interaction:** Experienced in interacting with **Ethereum** smart contracts to fetch token data, such as name, decimals, and transaction logs, leveraging **Ethers.js** for smart contract interactions.
+- **Data Visualization:** Proficient in creating dynamic and responsive charts and graphs using **Chart.js** to visualize Ethereum network metrics such as gas usage, transfer volumes, and base fees.
+- **State Management:** Implemented state management with **React Hooks** and **useState**, **useEffect** for handling Ethereum network updates and dynamic token selection.
+- **Real-time Data Handling:** Implemented real-time updates with **WebSocket** connections to monitor blockchain changes and reflect them instantly in the application.
 
 ## Overview
 
